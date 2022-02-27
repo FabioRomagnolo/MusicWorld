@@ -1,0 +1,3 @@
+# Functions deployment
+
+gcloud functions deploy download_lyrics --runtime python39 --env-vars-file .env.yaml --trigger-event "providers/cloud.firestore/eventTypes/document.create" --trigger-resource "projects/musicworld-2021/databases/(default)/documents/users/{email}/favorite_tracks/{track_id}"

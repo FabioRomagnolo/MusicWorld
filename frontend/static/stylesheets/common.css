@@ -1,0 +1,167 @@
+/* Common CSS for details pages about errors, users, artists, albums and tracks */
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {
+    .container {max-width: 85%;}
+}
+
+.details {
+    padding-top: 35px;
+    padding-bottom: 25px;
+}
+
+.details p {
+    color: #8b8e93;
+    font-weight: 300;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 26px;
+}
+
+.minor-link {
+    color: #8b8e93;
+    font-weight: 300;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 26px;
+}
+
+.details .img-container {
+    margin-top: 10px;
+}
+
+.details .favorite-tracks-table {
+    margin-top: 15px;
+}
+
+.details .designation {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.details .designation h2 {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+.details .designation h6 {
+    margin-top: 5px;
+}
+.details .designation span {
+    font-style: italic;
+    font-size: 24px;
+}
+.popularity {
+    display: flex;
+}
+.popularity-bar {
+    width: 50%;
+    height: 24px;
+    margin-top: 4px;
+}
+.popularity-bar-color {
+    background-color: #1287C3;
+}
+
+.details .description{
+    padding-top: 20px;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.details .description h4 {
+    margin-top: 40px
+}
+.details .description h3 {
+    color: #8b8e93;
+}
+.details .description li {
+    color: #8b8e93;
+}
+.details .description p {
+    margin-bottom: 15px;
+    font-weight: 400;
+    font-size: 15px;
+}
+.details .description h6 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.details .table-contents {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.description-content {
+    position: relative;
+    height: auto;
+    max-height: 10vh;
+    overflow: hidden;
+    -webkit-mask-image: -webkit-gradient(linear, left 50%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))
+}
+.description-content.expand {
+    max-height: 100%;
+    -webkit-mask-image: none;
+}
+
+.btn-show-more-description {
+    background-color: #1287C3;
+}
+.btn-show-more-links {
+    background-color: black;
+}
+.btn-show-more-news {
+    background-color: #1287C3;
+}
+
+.spotify-embed{
+    border: 0;
+}
+
+.settings-container .active {
+    background-color: #1287C3;
+}
+
+.youtube-container .active {
+    background-color: darkred;
+}
+
+.news-container .active {
+    background-color: #1287C3;
+}
+.news-date {
+    width: 20%;
+    font-weight: 500;
+    margin-left: 15px;
+}
+.news-title {
+    width: 80%;
+}
+
+.links-container .active {
+    background-color: black;
+}
+.links-description {
+    font-weight: 500;
+}
+.links-image-container {
+    width: 20%;
+}
+.links-image {
+    width: 100%;
+    height: auto;
+}
+
+small {
+    color: #8b8e93;
+    font-weight: 300;
+    margin-bottom: 0;
+    font-size: 12px;
+    line-height: 26px;
+}
+
+.lyrics p {
+    color: #212529;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size: 24px;
+    line-height: 36px;
+}

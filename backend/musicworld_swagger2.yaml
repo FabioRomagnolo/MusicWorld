@@ -1,0 +1,5607 @@
+swagger: "2.0"
+
+info:
+  version: "1.0"
+  title: "Music World"
+  description: "Get songs, lyrics, news & more from Music World."
+
+host: "musicworld-2021.appspot.com"
+basePath: "/api/v1"
+
+schemes:
+  - https
+
+security:
+  - JWTBearerAuthorization: []
+  
+securityDefinitions:
+  JWTBearerAuthorization:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: 'JWT Bearer authorization token. Example of a valid value for the "Authorization" header: "Bearer eyJ3eXAiOiAKV1QiLCJhbPgiOiJIVzI1NiJ9"'
+  
+paths:
+    ###### SEARCH ENDPOINTS ######
+    /search/{query}:
+      parameters: 
+      - name: query
+        in: path
+        required: true
+        description: 'Query for Spotify Search API'
+        type: string
+        minLength: 1
+        maxLength: 255
+      get:
+        tags:
+          - Search
+        description: "Get max the 100 artists, 100 album and 100 tracks retrieved by query on Spotify's Search API."
+        operationId: "searchGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/SearchResult'
+          400:
+            description: "Invalid or missing query."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."
+    /news/{query}:
+      parameters: 
+      - name: query
+        in: path
+        required: true
+        description: 'Query for News API'
+        type: string
+        minLength: 1
+        maxLength: 255
+      get:
+        tags:
+          - Search
+        description: "Get max the 20 latest news about query from the following News API's sources:\nBBC, The Guardian, VICE, Google News, MTV News, Billboard, Il Corriere, Mediaset, GQ Italia.\n\nThe Developer Plan permits you to request 100 articles per day as far back as one month ago.\nBefore using this endpoint you should write the query taking care of:\n - Surrounding phrases with quotes (\") for exact match;\n- Prepending words or phrases that must appear with a + symbol;\n- Prepending words that must not appear with a - symbol;\n- Alternatively, using the AND / OR / NOT keywords, and optionally group these with parenthesis;"
+        operationId: "newsGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/NewsResult'
+          400:
+            description: "Invalid or missing query."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "News API returned nothing."
+            
+    ###### ARTISTS ENDPOINTS ######
+    /artists/{artist_id}:
+      parameters: 
+      - name: artist_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Artists
+        description: "Get all the Spotify's informations about the artist."
+        operationId: "artistsGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/Artist'
+          400: 
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."
+    /artists/{artist_id}/albums:
+      parameters: 
+      - name: artist_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Artists
+        description: "Get all the Spotify's informations about the artist's albums."
+        operationId: "artistsAlbumsGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              type: array
+              items:
+                $ref: '#/definitions/Album'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."
+    /artists/{artist_id}/top-tracks:
+      parameters: 
+      - name: artist_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Artists
+        description: "Get the Spotify's Top 10 Tracks of the artist."
+        operationId: "artistsTopTracksGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              type: array
+              items:
+                $ref: '#/definitions/Track'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."
+    /artists/{artist_id}/genius:
+      parameters: 
+      - name: artist_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Artists
+        description: "Get the Genius' URL and all the annotations about the artist."
+        operationId: "artistsGeniusGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/ArtistGenius'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API or Genius API returned nothing."   
+            
+    ###### ALBUMS ENDPOINTS ######
+    /albums/{album_id}:
+      parameters: 
+      - name: album_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Albums
+        description: "Get all the Spotify's informations about the album."
+        operationId: "albumsGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/Album'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."        
+    /albums/{album_id}/tracks:
+      parameters: 
+      - name: album_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Albums
+        description: "Get all the Spotify's informations about the album's tracks."
+        operationId: "albumsTracksGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              type: array
+              items:
+                $ref: '#/definitions/Track'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."        
+    /albums/{album_id}/genius:
+      parameters: 
+      - name: album_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Albums
+        description: "Get the Genius' URL and all the annotations about the album."
+        operationId: "albumsGeniusGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/AlbumGenius'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API or Genius API returned nothing."   
+            
+    ###### TRACKS ENDPOINTS ######
+    /tracks/{track_id}:
+      parameters: 
+      - name: track_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Tracks
+        description: "Get all the Spotify's informations about the track and the lyrics if they are available on database."
+        operationId: "tracksGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/Track'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API returned nothing."     
+      delete:
+        tags:
+          - Tracks
+        description: "Delete the track's informations saved on database."
+        operationId: "tracksDelete"
+        responses:
+          200:
+            description: "Success."
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The track was not found on database." 
+          500:
+            description: "Generic database error."
+      post:
+        tags:
+          - Tracks
+        description: "Post the track's lyrics on database."
+        operationId: "tracksPost"
+        consumes: [application/json]
+        parameters:
+          - in: body
+            name: requestBody
+            description: "Content of the request's body"
+            required: true
+            schema:
+              type: object
+              required:
+                - lyrics
+              properties:
+                lyrics:
+                  description:  "Genius' lyrics of the track."
+                  type: string
+                name:    
+                  description: "Track's name on Spotify."
+                  type: string
+              example:
+                  {
+                      "name": "Wish You Were Here",
+                      "lyrics": "[Spoken Intro]\nAnd disciplinary remains mercifully\nYes and um, I’m with you Derek, this star nonsense\nYes, yes, now which is it?\nI am sure of it\n[Twelve-string guitar Intro]\n\n[Verse]\nSo, so you think you can tell\nHeaven from Hell? Blue skies from pain?\nCan you tell a green field from a cold steel rail?\nA smile from a veil? Do you think you can tell?\nDid they get you to trade your heroes for ghosts?\nHot ashes for trees? Hot air for a cool breeze?\nCold comfort for change? Did you exchange\nA walk-on part in the war\nFor a lead role in a cage?\n\n[Acoustic Guitar Solo]\n\n[Chorus]\nHow I wish, how I wish you were here\nWe're just two lost souls swimming in a fishbowl year after year\nRunning over the same old ground, what have we found?\nThe same old fears, wish you were here\n[Instrumental Outro & Scatting]EmbedShare Url:CopyEmbed:Copy"
+                  }
+        responses:
+          201:
+            description: "Success."
+          400:
+            description: "Invalid base62 identifier or invalid body."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          409:
+            description: "Conflict. The track is already inserted in the database."
+          500:
+            description: "Generic database error."
+    /tracks/{track_id}/genius:
+      parameters: 
+      - name: track_id
+        in: path
+        required: true
+        description: 'Base62 identifier at the end of the Spotify URI'
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      get:
+        tags:
+          - Tracks
+        description: "Get the Genius' URL, all the annotations about the track and lyrics."
+        operationId: "tracksGeniusGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/TrackGenius'
+          400:
+            description: "Invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify API or Genius API returned nothing."
+    
+    ###### USERS ENDPOINTS ######
+    /users/{email}:
+      parameters: 
+      - name: email
+        in: path
+        required: true
+        description: 'Email address of the user'
+        type: string
+        format: email
+        
+      get:
+        tags:
+          - Users
+        description: "Get all the registered user's main informations available on database."
+        operationId: "usersGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/User'
+          400:
+            description: "Invalid email address."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The user is not registered on Music World."  
+          500:
+            description: "Generic database error."
+      delete:
+        tags:
+          - Users
+        description: "Delete all the users's informations saved on database."
+        operationId: "usersDelete"
+        responses:
+          200:
+            description: "Success."
+          400:
+            description: "Invalid email address."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The user is not registered on Music World." 
+          500:
+            description: "Generic database error."
+      post:
+        tags:
+          - Users
+        description: "Register the user on Music World."
+        operationId: "usersPost"
+        consumes: [application/json]
+        parameters:
+          - in: body
+            name: requestBody
+            description: "Content of the request's body"
+            required: true
+            schema:
+              type: object
+              required:
+                - provider
+              properties:
+                name: 
+                  type: string
+                  format: nullable
+                image: 
+                  type: string
+                  format: nullable
+                provider: 
+                  type: string
+                  enum: ['google', 'spotify']
+                
+        responses:
+          201:
+            description: "Success."
+          400:
+            description: "Invalid email address or invalid body."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          409:
+            description: "Conflict. The user is already registered."
+          500:
+            description: "Generic database error."
+    /users/{email}/favorite-tracks:
+      parameters: 
+      - name: email
+        in: path
+        required: true
+        description: 'Email address of the user'
+        type: string
+        format: email
+      
+      get:
+        tags:
+          - Users
+        description: "Get all the favorite tracks' user as list of ids."
+        operationId: "usersFavoriteTracksGet"
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    minLength: 22
+                    maxLength: 22
+                    format: base62
+              example:
+              - id: 0vFOzaXqZHahrZp6enQwQb
+              - id: 3TO7bbrUKrOSPGRTB5MeCz
+              - id: 5HNCy40Ni5BZJFw1TKzRsC
+          400:
+            description: "Invalid email address or invalid request's URL."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The user is not registered on Music World."     
+          500:
+            description: "Generic database error."
+    /users/{email}/favorite-tracks/{track_id}:
+      parameters: 
+      - name: email
+        in: path
+        required: true
+        description: 'Email address of the user'
+        type: string
+        format: email
+      - name: track_id
+        in: path
+        required: true
+        description: "Favorite Spotify track's id"
+        type: string
+        minLength: 22
+        maxLength: 22
+        format: base62
+        
+      delete:
+        tags:
+          - Users
+        description: "Delete the favorite track from user's favorite tracks list on database."
+        operationId: "usersFavoriteTracksDelete"
+        responses:
+          200:
+            description: "Success."
+          400:
+            description: "Invalid email address or invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The user is not registered on Music World or Spotify did not return any track." 
+          500:
+            description: "Generic database error."
+      post:
+        tags:
+          - Users
+        description: "Add the track to user's favorite tracks list on database."
+        operationId: "usersFavoriteTracksPost"
+                
+        responses:
+          201:
+            description: "Success."
+          400:
+            description: "Invalid email address or invalid base62 identifier."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "The user is not registered on Music World or Spotify did not return any track." 
+          409:
+            description: "Conflict. The track is already a user's favorite one."
+          500:
+            description: "Generic database error."
+    /users/spotify:
+      get:
+        tags:
+          - Users
+        description: "Once obtained the Spotify's user authorization code from login, this endpoint allows Music World to get the basic profile data as PrivateUserObject."
+        operationId: "usersSpotifyGet"
+        parameters: 
+          - name: authorization_code
+            in: query
+            required: true
+            description: "Spotify's authorization code"
+            type: string
+        produces: [application/json]
+        responses:
+          200:
+            description: "Success."
+            schema: 
+              $ref: '#/definitions/UserSpotify'
+          400:
+            description: "Missing authorization code in request's parameters."
+          401:
+            description: "Unauthorized. Missing 'Authorization' header."
+          403:
+            description: "Invalid Json Web Token (JWT) in 'Authorization' header."
+          404:
+            description: "Spotify user not found. The authorization code is invalid or the authorized redirect URI is wrong."
+            
+tags:
+  - name: Search
+  - name: Artists
+  - name: Albums
+  - name: Tracks
+  - name: Users
+
+definitions:
+  SearchResult:
+    type: object
+    properties:
+      artists: 
+        type: array
+        items:
+          $ref: '#/definitions/Artist'
+      albums: 
+        type: array
+        items: 
+          $ref: '#/definitions/Album'
+      tracks: 
+        type: array
+        items: 
+          $ref: '#/definitions/Track'
+  NewsResult:
+    type: array
+    items: 
+      type: object
+      properties: 
+        source: 
+          type: object
+          properties: 
+            id: 
+              type: string
+            name: 
+              type: string
+        author: 
+          type: string
+        title: 
+          type: string
+        description: 
+          type: string
+        url: 
+          type: string
+        urlToImage: 
+          type: string
+        publishedAt: 
+          type: string
+          format: date-time
+        content: 
+          type: string
+    example:
+    - source:
+        id: bbc-news
+        name: BBC News
+      author: 'https://www.facebook.com/bbcnews'
+      title: British music exports reach a record high
+      description: 'Artists like Dua Lipa, Coldplay and The Beatles help the British music industry make £500m overseas.'
+      url: 'https://www.bbc.co.uk/news/entertainment-arts-57486272'
+      urlToImage: 'https://ichef.bbci.co.uk/news/1024/branded_news/13FD1/production/_118937818_artistmontage.jpg'
+      publishedAt: '2021-06-16T03:21:49Z'
+      content: By Mark SavageBBC music reporter\r\nimage copyrightGetty Images\r\nimage captionNew hits and classic tracks have helped the UK become the second-biggest exporter of music in the world\r\nDua Lipa, Coldplay… [+2070 chars]
+      
+  Artist:
+    type: object
+    properties:
+      external_urls: 
+        type: object
+        properties: 
+          spotify: 
+            type: string
+      followers: 
+        type: object
+        properties: 
+          href: 
+            type: string
+            format: nullable
+          total: 
+            type: integer
+            format: int32
+      genres: 
+        type: array
+        items: 
+          type: string
+      href: 
+        type: string
+      id: 
+        type: string
+      images: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            height: 
+              type: integer
+              format: int32
+            url: 
+              type: string
+            width: 
+              type: integer
+              format: int32
+      name: 
+        type: string
+      popularity: 
+        type: integer
+        format: int32
+      type: 
+        type: string
+      uri: 
+        type: string
+    example:
+      external_urls:
+        spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+      followers:
+        href: null
+        total: 14862890
+      genres:
+        - album rock
+        - art rock
+        - classic rock
+        - progressive rock
+        - psychedelic rock
+        - rock
+        - symphonic rock
+      href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+      id: 0k17h0D3J5VfsdmQ1iZtE9
+      images:
+        - height: 977
+          url: 'https://i.scdn.co/image/e69f71e2be4b67b82af90fb8e9d805715e0684fa'
+          width: 1000
+        - height: 625
+          url: 'https://i.scdn.co/image/d011c95081cd9a329e506abd7ded47535d524a07'
+          width: 640
+        - height: 195
+          url: 'https://i.scdn.co/image/f0a39a8a196a87a7236bdcf8a8708f6d5d3547cc'
+          width: 200
+        - height: 63
+          url: 'https://i.scdn.co/image/ec1fb7127168dbaa962404031409c5a293b95ec6'
+          width: 64
+      name: Pink Floyd
+      popularity: 83
+      type: artist
+      uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+  ArtistGenius:
+    type: object
+    properties:
+      url: 
+        type: string
+      annotations: 
+        type: object
+        properties: 
+          description: 
+            type: string
+          alternate_names: 
+            type: array
+            items: 
+              type: string
+    example:
+      url: 'https://genius.com/artists/Pink-floyd'
+      annotations:
+        description: |-
+          <p><a href="https://www.pinkfloyd.com/home.php" rel="noopener nofollow">Pink Floyd</a> was a British rock band who managed to carve a path for progressive and psychedelic music in a way that was uniquely fascinating at the time and has remained equally momentous in the modern age. The name “Pink Floyd” came from two blues musicians that founding member Syd Barrett idolized—<a href="https://genius.com/artists/Pink-anderson" rel="noopener" data-api_path="/artists/350877">Pink Anderson</a> and <a href="https://genius.com/artists/Floyd-council" rel="noopener" data-api_path="/artists/380346">Floyd Council</a>.</p>
+      
+          <p>The band was formed in 1965 London by <a href="https://genius.com/artists/Syd-barrett" rel="noopener" data-api_path="/artists/62540">Barrett</a> (guitars, vocals), <a href="https://genius.com/artists/Nick-mason" rel="noopener" data-api_path="/artists/174898">Nick Mason</a> (drums), <a href="https://genius.com/artists/Roger-waters" rel="noopener" data-api_path="/artists/33624">Roger Waters</a> (bass), and <a href="https://genius.com/artists/Richard-wright-musician" rel="noopener" data-api_path="/artists/41626">Richard Wright</a> (keyboards). Sometime after releasing their debut album, 1967’s <a href="https://genius.com/albums/Pink-floyd/The-piper-at-the-gates-of-dawn" rel="noopener" data-api_path="/albums/31179"><em>The Piper at the Gates of Dawn</em></a>, the group saw the addition of a second singer-guitarist, <a href="https://genius.com/artists/David-gilmour" rel="noopener" data-api_path="/artists/33622">David Gilmour</a>. This acted largely as a means of replacing Barrett, who was forced to leave in 1968 <a href="http://sydbarrett.net/subpages/articles/syd_barrett_story_by_syd_and_tho.htm" rel="noopener nofollow">for mental health reasons</a>, resulting in Waters taking over as the main vocalist.</p>
+      
+          <p>The band broke into the mainstream with 1973’s <a href="https://genius.com/albums/Pink-floyd/The-dark-side-of-the-moon" rel="noopener" data-api_path="/albums/14530"><em>Dark Side of the Moon</em></a>, an album that became one of the <a href="http://www.rollingstone.com/music/news/erykah-badu-billy-corgan-and-more-on-legacy-of-dark-side-of-the-moon-20110928" rel="noopener nofollow">best-selling and most influential</a> records in music history. Their follow-up efforts, 1975’s <a href="https://genius.com/albums/Pink-floyd/Wish-you-were-here" rel="noopener" data-api_path="/albums/22136"><em>Wish You Were Here</em></a> and 1977’s <a href="https://genius.com/albums/Pink-floyd/Animals" rel="noopener" data-api_path="/albums/15067"><em>Animals</em></a>, also sold well. However, the band started to see some <a href="http://www.rollingstone.com/music/news/roger-waters-david-gilmour-is-uninterested-in-touring-the-wall-20100505" rel="noopener nofollow">in-fighting</a> while making their next album, a rock opera about how Waters felt frustrated and detached from his audience. Waters seemingly became extremely controlling, firing Wright over disputes about touring and his contributions to the album. The result, 1979’s <a href="https://genius.com/albums/Pink-floyd/The-wall" rel="noopener" data-api_path="/albums/14831"><em>The Wall</em></a>, became the best-selling double album of all time. It spawned iconic songs such as the "#1 hit, <a href="https://genius.com/Pink-floyd-another-brick-in-the-wall-part-ii-lyrics" rel="noopener" data-api_path="/songs/106641">“Another Brick in the Wall, Pt. 2,”</a> and the melodic <a href="https://genius.com/Pink-floyd-comfortably-numb-lyrics" rel="noopener" data-api_path="/songs/65489">“Comfortably Numb.”</a></p>"
+      
+          <p>After the not-so-well-received <a href="https://genius.com/albums/Pink-floyd/The-final-cut" rel="noopener" data-api_path="/albums/32739"><em>Final Cut</em></a>, released in 1983, Waters decided to call it quits and attempted to dissolve the band. However, Gilmour, Mason, and Wright opted to make more albums with the band’s name despite a lawsuit by Waters, keeping Floyd alive until their collective hiatus in 1996, following the 1994 <a href="https://genius.com/albums/pink-floyd/the-division-bell" rel="noopener" data-api_path="/albums/32748"><em>The Division Bell</em></a> tour.</p>
+      
+          <p>The quartet managed to make amends and reunite for a final gig in 2005, performing five songs for the Live 8 concert at Hyde Park. Barrett died in 2006 and Wright died in 2008, but Pink Floyd’s legacy remains alive through their extensive <a href="https://genius.com/Pink-floyd-pink-floyd-discography-annotated" rel="noopener" data-api_path="/songs/1226330">discography</a>, as well as Gilmour and Waters' many solo projects, re-releases of the group’s catalog, and the band’s final album, November 2014’s <a href="https://genius.com/albums/Pink-floyd/The-endless-river" rel="noopener" data-api_path="/albums/112608"><em>The Endless River</em></a>—a record composed of leftover <em>Division Bell</em>-era recordings.</p>
+      
+          <p>In September of 2019, the band launched a <a href="https://pinkfloydexhibition.de/eng/exhibition.html" rel="noopener nofollow">five-month-long multimedia tour</a> in Germany. “The Pink Floyd Exhibition: Their Mortal Remains” seeks to reveal to visitors experiences that they would not get anywhere else. For example, the exhibition features unreleased recordings from gigs, tokens from band members, and more.</p>
+        alternate_names: []
+  
+  Album:
+    type: object
+    properties:
+      album_type: 
+        type: string
+      artists: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            external_urls: 
+              type: object
+              properties: 
+                spotify: 
+                  type: string
+            href: 
+              type: string
+            id: 
+              type: string
+            name: 
+              type: string
+            type: 
+              type: string
+            uri: 
+              type: string
+      available_markets: 
+        type: array
+        items: 
+          type: string
+      copyrights: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            text: 
+              type: string
+            type: 
+              type: string
+      external_ids: 
+        type: object
+        properties: 
+          upc: 
+            type: string
+      external_urls: 
+        type: object
+        properties: 
+          spotify: 
+            type: string
+      genres: 
+        type: array
+        items:
+          type: string
+      href: 
+        type: string
+      id: 
+        type: string
+      images: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            height: 
+              type: integer
+              format: int32
+            url: 
+              type: string
+            width: 
+              type: integer
+              format: int32
+      label: 
+        type: string
+      name: 
+        type: string
+      popularity: 
+        type: integer
+        format: int32
+      release_date: 
+        type: string
+        format: date
+      release_date_precision: 
+        type: string
+      total_tracks: 
+        type: integer
+        format: int32
+      tracks: 
+        type: object
+        properties: 
+          href: 
+            type: string
+          items: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                artists: 
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      external_urls: 
+                        type: object
+                        properties: 
+                          spotify: 
+                            type: string
+                      href: 
+                        type: string
+                      id: 
+                        type: string
+                      name: 
+                        type: string
+                      type: 
+                        type: string
+                      uri: 
+                        type: string
+                available_markets: 
+                  type: array
+                  items: 
+                    type: string
+                disc_number: 
+                  type: integer
+                  format: int32
+                duration_ms: 
+                  type: integer
+                  format: int32
+                explicit: 
+                  type: boolean
+                external_urls: 
+                  type: object
+                  properties: 
+                    spotify: 
+                      type: string
+                href: 
+                  type: string
+                id: 
+                  type: string
+                is_local: 
+                  type: boolean
+                name: 
+                  type: string
+                preview_url: 
+                  type: string
+                track_number: 
+                  type: integer
+                  format: int32
+                type: 
+                  type: string
+                uri: 
+                  type: string
+          limit: 
+            type: integer
+            format: int32
+          next: 
+            type: string
+            format: nullable
+          offset: 
+            type: integer
+            format: int32
+          previous: 
+            type: string
+            format: nullable
+          total: 
+            type: integer
+            format: int32
+      type: 
+        type: string
+      uri: 
+        type: string
+    example:
+      album_type: album
+      artists:
+        - external_urls:
+            spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+          href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+          id: 0k17h0D3J5VfsdmQ1iZtE9
+          name: Pink Floyd
+          type: artist
+          uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+      available_markets:
+        - AE
+        - AG
+        - AO
+        - AR
+        - AU
+        - BB
+        - BD
+        - BF
+        - BH
+        - BI
+        - BJ
+        - BN
+        - BO
+        - BR
+        - BS
+        - BT
+        - BW
+        - BZ
+        - CA
+        - CI
+        - CL
+        - CM
+        - CO
+        - CR
+        - CV
+        - CW
+        - DJ
+        - DM
+        - DO
+        - EC
+        - EG
+        - FJ
+        - FM
+        - GA
+        - GD
+        - GH
+        - GM
+        - GN
+        - GQ
+        - GT
+        - GW
+        - GY
+        - HK
+        - HN
+        - HT
+        - ID
+        - IL
+        - IN
+        - JM
+        - JO
+        - JP
+        - KE
+        - KH
+        - KI
+        - KM
+        - KN
+        - KR
+        - KW
+        - LA
+        - LB
+        - LC
+        - LK
+        - LR
+        - LS
+        - MG
+        - MH
+        - ML
+        - MO
+        - MR
+        - MU
+        - MV
+        - MW
+        - MX
+        - MY
+        - MZ
+        - NA
+        - NE
+        - NG
+        - NI
+        - NP
+        - NR
+        - NZ
+        - OM
+        - PA
+        - PE
+        - PG
+        - PH
+        - PK
+        - PS
+        - PW
+        - PY
+        - QA
+        - RW
+        - SA
+        - SB
+        - SC
+        - SG
+        - SL
+        - SN
+        - SR
+        - ST
+        - SV
+        - SZ
+        - TD
+        - TG
+        - TH
+        - TL
+        - TN
+        - TO
+        - TT
+        - TV
+        - TW
+        - TZ
+        - UG
+        - US
+        - UY
+        - VC
+        - VN
+        - VU
+        - WS
+        - ZA
+        - ZM
+        - ZW
+      copyrights:
+        - text: '(P) 2016 The copyright in this sound recording is owned by Pink Floyd Music Ltd., marketed and distributed by Sony Music Entertainment'
+          type: P
+      external_ids:
+        upc: '886445613841'
+      external_urls:
+        spotify: 'https://open.spotify.com/album/5Dbax7G8SWrP9xyzkOvy2F'
+      genres: []
+      href: 'https://api.spotify.com/v1/albums/5Dbax7G8SWrP9xyzkOvy2F'
+      id: 5Dbax7G8SWrP9xyzkOvy2F
+      images:
+        - height: 640
+          url: 'https://i.scdn.co/image/ab67616d0000b273288d32d88a616b9a278ddc07'
+          width: 640
+        - height: 300
+          url: 'https://i.scdn.co/image/ab67616d00001e02288d32d88a616b9a278ddc07'
+          width: 300
+        - height: 64
+          url: 'https://i.scdn.co/image/ab67616d00004851288d32d88a616b9a278ddc07'
+          width: 64
+      label: Pink Floyd Records
+      name: The Wall
+      popularity: 74
+      release_date: '1979-11-30'
+      release_date_precision: day
+      total_tracks: 26
+      tracks:
+        href: 'https://api.spotify.com/v1/albums/5Dbax7G8SWrP9xyzkOvy2F/tracks?offset=0&limit=50'
+        items:
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 198221
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/24YmWQgunJGAU8El3ndkyn'
+            href: 'https://api.spotify.com/v1/tracks/24YmWQgunJGAU8El3ndkyn'
+            id: 24YmWQgunJGAU8El3ndkyn
+            is_local: false
+            name: In the Flesh?
+            preview_url: 'https://p.scdn.co/mp3-preview/a38c14bfaea20ed78a9823dff74740fcd8f89dc4?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 1
+            type: track
+            uri: 'spotify:track:24YmWQgunJGAU8El3ndkyn'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 146321
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/62zuXt6X5B6YQOBNFV2eXG'
+            href: 'https://api.spotify.com/v1/tracks/62zuXt6X5B6YQOBNFV2eXG'
+            id: 62zuXt6X5B6YQOBNFV2eXG
+            is_local: false
+            name: The Thin Ice
+            preview_url: 'https://p.scdn.co/mp3-preview/79bff7dfc9d4afe3f2c0851fe866b92dbafba419?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 2
+            type: track
+            uri: 'spotify:track:62zuXt6X5B6YQOBNFV2eXG'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 192145
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/7K6xMPtAjTuLPNlJMLf5bS'
+            href: 'https://api.spotify.com/v1/tracks/7K6xMPtAjTuLPNlJMLf5bS'
+            id: 7K6xMPtAjTuLPNlJMLf5bS
+            is_local: false
+            name: 'Another Brick in the Wall, Pt. 1'
+            preview_url: 'https://p.scdn.co/mp3-preview/d081caf9ee7854854064eb155782db78015bdd97?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 3
+            type: track
+            uri: 'spotify:track:7K6xMPtAjTuLPNlJMLf5bS'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 110826
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/2O3l4X1yTua8oMMCtazkyo'
+            href: 'https://api.spotify.com/v1/tracks/2O3l4X1yTua8oMMCtazkyo'
+            id: 2O3l4X1yTua8oMMCtazkyo
+            is_local: false
+            name: The Happiest Days of Our Lives
+            preview_url: 'https://p.scdn.co/mp3-preview/9c97ec4966abbe0735e3da764d5041a3301d1177?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 4
+            type: track
+            uri: 'spotify:track:2O3l4X1yTua8oMMCtazkyo'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 238746
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/4gMgiXfqyzZLMhsksGmbQV'
+            href: 'https://api.spotify.com/v1/tracks/4gMgiXfqyzZLMhsksGmbQV'
+            id: 4gMgiXfqyzZLMhsksGmbQV
+            is_local: false
+            name: 'Another Brick in the Wall, Pt. 2'
+            preview_url: 'https://p.scdn.co/mp3-preview/92210b01fcc6efa80008663c158baf79cf0d7b5f?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 5
+            type: track
+            uri: 'spotify:track:4gMgiXfqyzZLMhsksGmbQV'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 334893
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/1GEOSS415bZVHNuXWlCT6b'
+            href: 'https://api.spotify.com/v1/tracks/1GEOSS415bZVHNuXWlCT6b'
+            id: 1GEOSS415bZVHNuXWlCT6b
+            is_local: false
+            name: Mother
+            preview_url: 'https://p.scdn.co/mp3-preview/27e17be40ad92710ee3ba81cde4e75b05e2869ed?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 6
+            type: track
+            uri: 'spotify:track:1GEOSS415bZVHNuXWlCT6b'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 167239
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/0ESdtt9cjGZUkUbaubSrv2'
+            href: 'https://api.spotify.com/v1/tracks/0ESdtt9cjGZUkUbaubSrv2'
+            id: 0ESdtt9cjGZUkUbaubSrv2
+            is_local: false
+            name: Goodbye Blue Sky
+            preview_url: 'https://p.scdn.co/mp3-preview/fed18e9a2995fa09f7dcba91f4bb0cb0b62a4867?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 7
+            type: track
+            uri: 'spotify:track:0ESdtt9cjGZUkUbaubSrv2'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 127830
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/5yMyLZu4wPvWcbLFiRhYVM'
+            href: 'https://api.spotify.com/v1/tracks/5yMyLZu4wPvWcbLFiRhYVM'
+            id: 5yMyLZu4wPvWcbLFiRhYVM
+            is_local: false
+            name: Empty Spaces
+            preview_url: 'https://p.scdn.co/mp3-preview/ec839681e25c7b6034b41871def81722eef8a4fd?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 8
+            type: track
+            uri: 'spotify:track:5yMyLZu4wPvWcbLFiRhYVM'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 209956
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/3xGJuHvSxFJxxYlHj5BIoT'
+            href: 'https://api.spotify.com/v1/tracks/3xGJuHvSxFJxxYlHj5BIoT'
+            id: 3xGJuHvSxFJxxYlHj5BIoT
+            is_local: false
+            name: Young Lust
+            preview_url: 'https://p.scdn.co/mp3-preview/bcc0a4e4623540959aba14d94c1b6dab02fe54f1?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 9
+            type: track
+            uri: 'spotify:track:3xGJuHvSxFJxxYlHj5BIoT'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 216800
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/66YHxyGAUGjMBDdrDlWIMD'
+            href: 'https://api.spotify.com/v1/tracks/66YHxyGAUGjMBDdrDlWIMD'
+            id: 66YHxyGAUGjMBDdrDlWIMD
+            is_local: false
+            name: One of My Turns
+            preview_url: 'https://p.scdn.co/mp3-preview/0c6f0150f6b88b5c0d7175cb4ee59ebf87ede039?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 10
+            type: track
+            uri: 'spotify:track:66YHxyGAUGjMBDdrDlWIMD'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 255934
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/3QEWEv1tvHmVgsT5THpGDn'
+            href: 'https://api.spotify.com/v1/tracks/3QEWEv1tvHmVgsT5THpGDn'
+            id: 3QEWEv1tvHmVgsT5THpGDn
+            is_local: false
+            name: Don't Leave Me Now
+            preview_url: 'https://p.scdn.co/mp3-preview/6756b77ca002981216a172f7b04a3035a9226aac?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 11
+            type: track
+            uri: 'spotify:track:3QEWEv1tvHmVgsT5THpGDn'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 74411
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/5A7eooPKJHtr0UJmatjH4a'
+            href: 'https://api.spotify.com/v1/tracks/5A7eooPKJHtr0UJmatjH4a'
+            id: 5A7eooPKJHtr0UJmatjH4a
+            is_local: false
+            name: 'Another Brick in the Wall, Pt. 3'
+            preview_url: 'https://p.scdn.co/mp3-preview/26834eff5ba1b4e8ce0bc71b4068bb8190a5575f?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 12
+            type: track
+            uri: 'spotify:track:5A7eooPKJHtr0UJmatjH4a'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 1
+            duration_ms: 73429
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/0ZXkKRO789QKBR6ME7pIDF'
+            href: 'https://api.spotify.com/v1/tracks/0ZXkKRO789QKBR6ME7pIDF'
+            id: 0ZXkKRO789QKBR6ME7pIDF
+            is_local: false
+            name: Goodbye Cruel World
+            preview_url: 'https://p.scdn.co/mp3-preview/a35bc8583d7bca4622f615af1fd3dc3676a55b68?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 13
+            type: track
+            uri: 'spotify:track:0ZXkKRO789QKBR6ME7pIDF'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 278440
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/7F02x6EKYIQV3VcTaTm7oN'
+            href: 'https://api.spotify.com/v1/tracks/7F02x6EKYIQV3VcTaTm7oN'
+            id: 7F02x6EKYIQV3VcTaTm7oN
+            is_local: false
+            name: Hey You
+            preview_url: 'https://p.scdn.co/mp3-preview/a03fcdbf2223e1fe78f886770b0797553b924fc6?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 1
+            type: track
+            uri: 'spotify:track:7F02x6EKYIQV3VcTaTm7oN'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 161595
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/5HAjss9faCAowGY8dM24r6'
+            href: 'https://api.spotify.com/v1/tracks/5HAjss9faCAowGY8dM24r6'
+            id: 5HAjss9faCAowGY8dM24r6
+            is_local: false
+            name: Is There Anybody Out There?
+            preview_url: 'https://p.scdn.co/mp3-preview/150b273ab8765b0d6d82b8c507c90e0ca8112c89?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 2
+            type: track
+            uri: 'spotify:track:5HAjss9faCAowGY8dM24r6'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 203360
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/2gTnu5RZNVFVnWdjLnyUA5'
+            href: 'https://api.spotify.com/v1/tracks/2gTnu5RZNVFVnWdjLnyUA5'
+            id: 2gTnu5RZNVFVnWdjLnyUA5
+            is_local: false
+            name: Nobody Home
+            preview_url: 'https://p.scdn.co/mp3-preview/c8e4adbce8709f5d458012c498d716650cdf5480?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 3
+            type: track
+            uri: 'spotify:track:2gTnu5RZNVFVnWdjLnyUA5'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 93356
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/7FCiDC7ojdm19CJePq6QAe'
+            href: 'https://api.spotify.com/v1/tracks/7FCiDC7ojdm19CJePq6QAe'
+            id: 7FCiDC7ojdm19CJePq6QAe
+            is_local: false
+            name: Vera
+            preview_url: 'https://p.scdn.co/mp3-preview/3b4a94e2fac3c6a7f37cbc69e49d76df299d6e68?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 4
+            type: track
+            uri: 'spotify:track:7FCiDC7ojdm19CJePq6QAe'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 87207
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/4TUStFzBGQqn0GrkzVWFV4'
+            href: 'https://api.spotify.com/v1/tracks/4TUStFzBGQqn0GrkzVWFV4'
+            id: 4TUStFzBGQqn0GrkzVWFV4
+            is_local: false
+            name: Bring the Boys Back Home
+            preview_url: 'https://p.scdn.co/mp3-preview/295f08d986f7d92f05b349aefe2ab3717ebcfcbd?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 5
+            type: track
+            uri: 'spotify:track:4TUStFzBGQqn0GrkzVWFV4'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 382296
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/5HNCy40Ni5BZJFw1TKzRsC'
+            href: 'https://api.spotify.com/v1/tracks/5HNCy40Ni5BZJFw1TKzRsC'
+            id: 5HNCy40Ni5BZJFw1TKzRsC
+            is_local: false
+            name: Comfortably Numb
+            preview_url: 'https://p.scdn.co/mp3-preview/daf1a7a5cf0ca8fc212ce61ac3d058fb12e2814f?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 6
+            type: track
+            uri: 'spotify:track:5HNCy40Ni5BZJFw1TKzRsC'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 96560
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/077OhUjy58qkjscrXjW696'
+            href: 'https://api.spotify.com/v1/tracks/077OhUjy58qkjscrXjW696'
+            id: 077OhUjy58qkjscrXjW696
+            is_local: false
+            name: The Show Must Go On
+            preview_url: 'https://p.scdn.co/mp3-preview/83f0dbdafc619021e2d8f51309edc0567213a0c9?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 7
+            type: track
+            uri: 'spotify:track:077OhUjy58qkjscrXjW696'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 255546
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/5OFi9CIyD6s1oENyHapK2W'
+            href: 'https://api.spotify.com/v1/tracks/5OFi9CIyD6s1oENyHapK2W'
+            id: 5OFi9CIyD6s1oENyHapK2W
+            is_local: false
+            name: In the Flesh
+            preview_url: 'https://p.scdn.co/mp3-preview/dd4b832659553993000db12e82a10a0ff333504f?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 8
+            type: track
+            uri: 'spotify:track:5OFi9CIyD6s1oENyHapK2W'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 263573
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/0EaLRxrtnq7Mqhdf8q9txr'
+            href: 'https://api.spotify.com/v1/tracks/0EaLRxrtnq7Mqhdf8q9txr'
+            id: 0EaLRxrtnq7Mqhdf8q9txr
+            is_local: false
+            name: Run Like Hell
+            preview_url: 'https://p.scdn.co/mp3-preview/dacfa559d9d31b5ab8d19d1472ce353b7a06bc49?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 9
+            type: track
+            uri: 'spotify:track:0EaLRxrtnq7Mqhdf8q9txr'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 237097
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/2DVkYfl2YuOMlRfC98srEG'
+            href: 'https://api.spotify.com/v1/tracks/2DVkYfl2YuOMlRfC98srEG'
+            id: 2DVkYfl2YuOMlRfC98srEG
+            is_local: false
+            name: Waiting for the Worms
+            preview_url: 'https://p.scdn.co/mp3-preview/15e4aa1e1d6a2c9f9a15623571b8cfbf1b6127c3?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 10
+            type: track
+            uri: 'spotify:track:2DVkYfl2YuOMlRfC98srEG'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 30622
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/21L1dVOTGhvAKvBXXnTIHj'
+            href: 'https://api.spotify.com/v1/tracks/21L1dVOTGhvAKvBXXnTIHj'
+            id: 21L1dVOTGhvAKvBXXnTIHj
+            is_local: false
+            name: Stop
+            preview_url: 'https://p.scdn.co/mp3-preview/b243b10f1798caa0142d2d237cb8914df02eeae2?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 11
+            type: track
+            uri: 'spotify:track:21L1dVOTGhvAKvBXXnTIHj'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 318846
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/1UMXtudajhlocMzXVSngDU'
+            href: 'https://api.spotify.com/v1/tracks/1UMXtudajhlocMzXVSngDU'
+            id: 1UMXtudajhlocMzXVSngDU
+            is_local: false
+            name: The Trial
+            preview_url: 'https://p.scdn.co/mp3-preview/1932ed11a4364952c4a60eb47536a042809e73a3?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 12
+            type: track
+            uri: 'spotify:track:1UMXtudajhlocMzXVSngDU'
+          - artists:
+              - external_urls:
+                  spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+                href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+                id: 0k17h0D3J5VfsdmQ1iZtE9
+                name: Pink Floyd
+                type: artist
+                uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+            available_markets:
+              - AE
+              - AG
+              - AO
+              - AR
+              - AU
+              - BB
+              - BD
+              - BF
+              - BH
+              - BI
+              - BJ
+              - BN
+              - BO
+              - BR
+              - BS
+              - BT
+              - BW
+              - BZ
+              - CA
+              - CI
+              - CL
+              - CM
+              - CO
+              - CR
+              - CV
+              - CW
+              - DJ
+              - DM
+              - DO
+              - EC
+              - EG
+              - FJ
+              - FM
+              - GA
+              - GD
+              - GH
+              - GM
+              - GN
+              - GQ
+              - GT
+              - GW
+              - GY
+              - HK
+              - HN
+              - HT
+              - ID
+              - IL
+              - IN
+              - JM
+              - JO
+              - JP
+              - KE
+              - KH
+              - KI
+              - KM
+              - KN
+              - KR
+              - KW
+              - LA
+              - LB
+              - LC
+              - LK
+              - LR
+              - LS
+              - MG
+              - MH
+              - ML
+              - MO
+              - MR
+              - MU
+              - MV
+              - MW
+              - MX
+              - MY
+              - MZ
+              - NA
+              - NE
+              - NG
+              - NI
+              - NP
+              - NR
+              - NZ
+              - OM
+              - PA
+              - PE
+              - PG
+              - PH
+              - PK
+              - PS
+              - PW
+              - PY
+              - QA
+              - RW
+              - SA
+              - SB
+              - SC
+              - SG
+              - SL
+              - SN
+              - SR
+              - ST
+              - SV
+              - SZ
+              - TD
+              - TG
+              - TH
+              - TL
+              - TN
+              - TO
+              - TT
+              - TV
+              - TW
+              - TZ
+              - UG
+              - US
+              - UY
+              - VC
+              - VN
+              - VU
+              - WS
+              - ZA
+              - ZM
+              - ZW
+            disc_number: 2
+            duration_ms: 104113
+            explicit: false
+            external_urls:
+              spotify: 'https://open.spotify.com/track/1nW0lHGLpE1iQDP5Nvt3x1'
+            href: 'https://api.spotify.com/v1/tracks/1nW0lHGLpE1iQDP5Nvt3x1'
+            id: 1nW0lHGLpE1iQDP5Nvt3x1
+            is_local: false
+            name: Outside the Wall
+            preview_url: 'https://p.scdn.co/mp3-preview/7f7d2c841c1a37e8e12a0b3e5aae9686def69d14?cid=e25b2446832246d39543fbe99f0c1629'
+            track_number: 13
+            type: track
+            uri: 'spotify:track:1nW0lHGLpE1iQDP5Nvt3x1'
+        limit: 50
+        next: None
+        offset: 0
+        previous: None
+        total: 26
+      type: album
+      uri: 'spotify:album:5Dbax7G8SWrP9xyzkOvy2F'
+  AlbumGenius:
+    type: object
+    properties:
+      url: 
+        type: string
+      annotations: 
+        type: object
+        properties: 
+          description: 
+            type: string
+          producers: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+          writers: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+          labels: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+    example:
+      url: 'https://genius.com/albums/Pink-floyd/Wish-you-were-here'
+      annotations:
+        description: |-
+          <p><em>Wish You Were Here</em> is the ninth studio album from English rock band Pink Floyd.</p>
+      
+          <p>The follow-up to their legendary album <em>The Dark Side Of The Moon</em>, its genesis was marked by the band’s disorientation following their rise to planetary exposure.</p>
+      
+          <p>Finding it difficult to figure out what to do with their creative future and physically worn out by extensive touring, the band members entered a state where they would reflect on the past, and most notably Pink Floyd founder-gone-mad Syd Barrett.</p>
+      
+          <p>This resulted in powerful lyrics from Roger Waters about failure to find one’s place in society and difficulty to find oneself at some point in life (especially in the title track); it also brought to existence the lengthy and unforgettable “Shine On You Crazy Diamond”, a homage to Syd Barrett that opens and closes the record, making up half of its duration.</p>
+      
+          <p><em>Wish You Were Here</em> has an overal melancholy feel, yet its melodic density, powerful guitar solos by David Gilmour and heavy use of Richard Wright’s keyboards provide a very colourful listening experience.</p>
+      
+          <p>Although they had approached it with quite a bit of a writer’s block, the band members have often voiced their satisfaction with the final result. Keyboardist Richard Wright and guitarist David Gilmour have stated that <em>Wish You Were Here</em> is their favourite Pink Floyd album.</p>
+        producers:
+          - name: Pink Floyd
+            url: 'https://genius.com/artists/Pink-floyd'
+        writers:
+          - name: David Gilmour
+            url: 'https://genius.com/artists/David-gilmour'
+          - name: Richard Wright
+            url: 'https://genius.com/artists/Richard-wright'
+          - name: Roger Waters
+            url: 'https://genius.com/artists/Roger-waters'
+        labels:
+          - name: Columbia Records
+            url: 'https://genius.com/artists/Columbia-records'
+          - name: Harvest Records
+            url: 'https://genius.com/artists/Harvest-records'
+            
+  Track:
+    type: object
+    properties:
+      album: 
+        type: object
+        properties: 
+          album_type: 
+            type: string
+          artists: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                external_urls: 
+                  type: object
+                  properties: 
+                    spotify: 
+                      type: string
+                href: 
+                  type: string
+                id: 
+                  type: string
+                name: 
+                  type: string
+                type: 
+                  type: string
+                uri: 
+                  type: string
+          available_markets: 
+            type: array
+            items: 
+              type: string
+          external_urls: 
+            type: object
+            properties: 
+              spotify: 
+                type: string
+          href: 
+            type: string
+          id: 
+            type: string
+          images: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                height: 
+                  type: integer
+                  format: int32
+                url: 
+                  type: string
+                width: 
+                  type: integer
+                  format: int32
+          name: 
+            type: string
+          release_date: 
+            type: string
+            format: date
+          release_date_precision: 
+            type: string
+          total_tracks: 
+            type: integer
+            format: int32
+          type: 
+            type: string
+          uri: 
+            type: string
+      artists: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            external_urls: 
+              type: object
+              properties: 
+                spotify: 
+                  type: string
+            href: 
+              type: string
+            id: 
+              type: string
+            name: 
+              type: string
+            type: 
+              type: string
+            uri: 
+              type: string
+      available_markets: 
+        type: array
+        items: 
+          type: string
+      disc_number: 
+        type: integer
+        format: int32
+      duration_ms: 
+        type: integer
+        format: int32
+      explicit: 
+        type: boolean
+      external_ids: 
+        type: object
+        properties: 
+          isrc: 
+            type: string
+      external_urls: 
+        type: object
+        properties: 
+          spotify: 
+            type: string
+      href: 
+        type: string
+      id: 
+        type: string
+      is_local: 
+        type: boolean
+      name: 
+        type: string
+      popularity: 
+        type: integer
+        format: int32
+      preview_url: 
+        type: string
+      track_number: 
+        type: integer
+        format: int32
+      type: 
+        type: string
+      uri: 
+        type: string
+      lyrics: 
+        type: string
+        format: nullable
+    example:
+      album:
+        album_type: album
+        artists:
+          - external_urls:
+              spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+            href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+            id: 0k17h0D3J5VfsdmQ1iZtE9
+            name: Pink Floyd
+            type: artist
+            uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+        available_markets:
+          - AE
+          - AG
+          - AO
+          - AR
+          - AU
+          - BB
+          - BD
+          - BF
+          - BH
+          - BI
+          - BJ
+          - BN
+          - BO
+          - BR
+          - BS
+          - BT
+          - BW
+          - BZ
+          - CA
+          - CI
+          - CL
+          - CM
+          - CO
+          - CR
+          - CV
+          - CW
+          - DJ
+          - DM
+          - DO
+          - EC
+          - EG
+          - FJ
+          - FM
+          - GA
+          - GD
+          - GH
+          - GM
+          - GN
+          - GQ
+          - GT
+          - GW
+          - GY
+          - HK
+          - HN
+          - HT
+          - ID
+          - IL
+          - IN
+          - JM
+          - JO
+          - JP
+          - KE
+          - KH
+          - KI
+          - KM
+          - KN
+          - KR
+          - KW
+          - LA
+          - LB
+          - LC
+          - LK
+          - LR
+          - LS
+          - MG
+          - MH
+          - ML
+          - MO
+          - MR
+          - MU
+          - MV
+          - MW
+          - MX
+          - MY
+          - MZ
+          - NA
+          - NE
+          - NG
+          - NI
+          - NP
+          - NR
+          - NZ
+          - OM
+          - PA
+          - PE
+          - PG
+          - PH
+          - PK
+          - PS
+          - PW
+          - PY
+          - QA
+          - RW
+          - SA
+          - SB
+          - SC
+          - SG
+          - SL
+          - SN
+          - SR
+          - ST
+          - SV
+          - SZ
+          - TD
+          - TG
+          - TH
+          - TL
+          - TN
+          - TO
+          - TT
+          - TV
+          - TW
+          - TZ
+          - UG
+          - US
+          - UY
+          - VC
+          - VN
+          - VU
+          - WS
+          - ZA
+          - ZM
+          - ZW
+        external_urls:
+          spotify: 'https://open.spotify.com/album/0bCAjiUamIFqKJsekOYuRw'
+        href: 'https://api.spotify.com/v1/albums/0bCAjiUamIFqKJsekOYuRw'
+        id: 0bCAjiUamIFqKJsekOYuRw
+        images:
+          - height: 640
+            url: 'https://i.scdn.co/image/ab67616d0000b273d8fa5ac6259dba33127b398a'
+            width: 640
+          - height: 300
+            url: 'https://i.scdn.co/image/ab67616d00001e02d8fa5ac6259dba33127b398a'
+            width: 300
+          - height: 64
+            url: 'https://i.scdn.co/image/ab67616d00004851d8fa5ac6259dba33127b398a'
+            width: 64
+        name: Wish You Were Here
+        release_date: '1975-09-12'
+        release_date_precision: day
+        total_tracks: 5
+        type: album
+        uri: 'spotify:album:0bCAjiUamIFqKJsekOYuRw'
+      artists:
+        - external_urls:
+            spotify: 'https://open.spotify.com/artist/0k17h0D3J5VfsdmQ1iZtE9'
+          href: 'https://api.spotify.com/v1/artists/0k17h0D3J5VfsdmQ1iZtE9'
+          id: 0k17h0D3J5VfsdmQ1iZtE9
+          name: Pink Floyd
+          type: artist
+          uri: 'spotify:artist:0k17h0D3J5VfsdmQ1iZtE9'
+      available_markets:
+        - AE
+        - AG
+        - AO
+        - AR
+        - AU
+        - BB
+        - BD
+        - BF
+        - BH
+        - BI
+        - BJ
+        - BN
+        - BO
+        - BR
+        - BS
+        - BT
+        - BW
+        - BZ
+        - CA
+        - CI
+        - CL
+        - CM
+        - CO
+        - CR
+        - CV
+        - CW
+        - DJ
+        - DM
+        - DO
+        - EC
+        - EG
+        - FJ
+        - FM
+        - GA
+        - GD
+        - GH
+        - GM
+        - GN
+        - GQ
+        - GT
+        - GW
+        - GY
+        - HK
+        - HN
+        - HT
+        - ID
+        - IL
+        - IN
+        - JM
+        - JO
+        - JP
+        - KE
+        - KH
+        - KI
+        - KM
+        - KN
+        - KR
+        - KW
+        - LA
+        - LB
+        - LC
+        - LK
+        - LR
+        - LS
+        - MG
+        - MH
+        - ML
+        - MO
+        - MR
+        - MU
+        - MV
+        - MW
+        - MX
+        - MY
+        - MZ
+        - NA
+        - NE
+        - NG
+        - NI
+        - NP
+        - NR
+        - NZ
+        - OM
+        - PA
+        - PE
+        - PG
+        - PH
+        - PK
+        - PS
+        - PW
+        - PY
+        - QA
+        - RW
+        - SA
+        - SB
+        - SC
+        - SG
+        - SL
+        - SN
+        - SR
+        - ST
+        - SV
+        - SZ
+        - TD
+        - TG
+        - TH
+        - TL
+        - TN
+        - TO
+        - TT
+        - TV
+        - TW
+        - TZ
+        - UG
+        - US
+        - UY
+        - VC
+        - VN
+        - VU
+        - WS
+        - ZA
+        - ZM
+        - ZW
+      disc_number: 1
+      duration_ms: 334743
+      explicit: false
+      external_ids:
+        isrc: GBN9Y1100088
+      external_urls:
+        spotify: 'https://open.spotify.com/track/6mFkJmJqdDVQ1REhVfGgd1'
+      href: 'https://api.spotify.com/v1/tracks/6mFkJmJqdDVQ1REhVfGgd1'
+      id: 6mFkJmJqdDVQ1REhVfGgd1
+      is_local: false
+      name: Wish You Were Here
+      popularity: 76
+      preview_url: 'https://p.scdn.co/mp3-preview/7ce0d4e5f0ffcf8fe1a312c9c2f9331c8d2bf994?cid=e25b2446832246d39543fbe99f0c1629'
+      track_number: 4
+      type: track
+      uri: 'spotify:track:6mFkJmJqdDVQ1REhVfGgd1'
+      lyrics: None
+  TrackGenius:
+    type: object
+    properties:
+      url: 
+        type: string
+      lyrics: 
+        type: string
+      annotations: 
+        type: object
+        properties: 
+          description: 
+            type: string
+          producers: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+          writers: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+          labels: 
+            type: array
+            items: 
+              type: object
+              properties: 
+                name: 
+                  type: string
+                url: 
+                  type: string
+    example:
+      url: 'https://genius.com/Pink-floyd-wish-you-were-here-lyrics'
+      lyrics: |-
+        [Spoken Intro]
+        And disciplinary remains mercifully
+        Yes and um, I’m with you Derek, this star nonsense
+        Yes, yes, now which is it?
+        I am sure of it
+        [Twelve-string guitar Intro]
+      
+        [Verse]
+        So, so you think you can tell
+        Heaven from Hell? Blue skies from pain?
+        Can you tell a green field from a cold steel rail?
+        A smile from a veil? Do you think you can tell?
+        Did they get you to trade your heroes for ghosts?
+        Hot ashes for trees? Hot air for a cool breeze?
+        Cold comfort for change? Did you exchange
+        A walk-on part in the war
+        For a lead role in a cage?
+      
+        [Acoustic Guitar Solo]
+      
+        [Chorus]
+        How I wish, how I wish you were here
+        We're just two lost souls swimming in a fishbowl year after year
+        Running over the same old ground, what have we found?
+        The same old fears, wish you were here
+        [Instrumental Outro & Scatting]EmbedShare Url:CopyEmbed:Copy
+      annotations:
+        description: |-
+          <p>“Wish You Were Here” is the title track on Pink Floyd’s 1975 album. The song’s lyrics encompass writer <a href="https://genius.com/artists/Roger-waters" rel="noopener" data-api_path="/artists/33624">Roger Waters</a>‘ feelings of alienation from other people, drawing particular inspiration from his old friend <a href="https://genius.com/artists/Syd-barrett" rel="noopener" data-api_path="/artists/62540">Syd Barrett</a>, the founder of Pink Floyd  who left the band due to mental health issues. The song forms part of a concept album focusing on absence and disenchantment with the music industry. The song “Shine on you Crazy Diamond (Parts 1-9)” was already an homage to Syd, while this one also grieves his absence. The other two songs on the album (“Welcome to the Machine” and “Have a Cigar”) express the band’s newfound distaste for the pressures of the music industry, pressures that they feel helped cause Syd to crack, thus tying the album together as a coherent piece.  David Gilmour and Roger Waters collaborated to write the music.</p>
+      
+          <p>This was a rare case of the Pink Floyd primary songwriters Roger Waters and David Gilmour mutually collaborating on a song – they rarely wrote together. Gilmour had the opening riff written and was playing it in the studio at a fast pace when Roger Waters heard it and asked him to play it slower. The song built from there, with the pair writing the music for the chorus and verses together, and Waters adding the lyrics.</p>
+      
+          <p>The song reflected the feeling of the band while they were recording the album. Waters felt they were not putting a full effort into the recording sessions.</p>
+      
+          <p>When this song starts, it sounds like it is coming from an AM radio somewhere in the distance. It represents the distance between the listener and the music.</p>
+      
+          <p>At 42 seconds, you can also hear Richard Wright cough. When he heard the song later, it inspired him to quit smoking.</p>
+      
+          <p>While not a single upon release, it earned this status with a version recorded on the live album <em><a href="https://genius.com/Pink-floyd-pulse-album-art-annotated" rel="noopener" data-api_path="/songs/1322129">Pulse</a></em>, where the cover depicted two lost souls staring into fish bowls.</p>
+      
+          <p><img src="https://images.genius.com/5c99a02ba38f1641969a68013038d37f.220x220x1.png" alt="" width="220" height="220" data-animated="false"></p>
+        producers:
+          - name: Pink Floyd
+            url: 'https://genius.com/artists/Pink-floyd'
+        writers:
+          - name: David Gilmour
+            url: 'https://genius.com/artists/David-gilmour'
+          - name: Roger Waters
+            url: 'https://genius.com/artists/Roger-waters'
+        labels:
+          - name: Columbia Records
+            url: 'https://genius.com/artists/Columbia-records'
+          - name: Harvest Records
+            url: 'https://genius.com/artists/Harvest-records'
+            
+  User:
+    type: object
+    properties:
+      email: 
+        type: string
+        format: email
+      name: 
+        type: string
+        format: nullable
+      image: 
+        type: string
+        format: nullable
+      provider: 
+        type: string
+        enum: ['google', 'spotify']
+    example:
+      email: pibava3872@advew.com
+      name: Pier Bava
+      image: null
+      provider: spotify
+  UserSpotify:
+    type: object
+    properties:
+      country: 
+        type: string
+      display_name: 
+        type: string
+      email: 
+        type: string
+      explicit_content: 
+        type: object
+        properties: 
+          filter_enabled: 
+            type: boolean
+          filter_locked: 
+            type: boolean
+      external_urls: 
+        type: object
+        properties: 
+          spotify: 
+            type: string
+      followers: 
+        type: object
+        properties: 
+          href: 
+            type: string
+          total: 
+            type: integer
+            format: int32
+      href: 
+        type: string
+      id: 
+        type: string
+      images: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            height: 
+              type: string
+            url: 
+              type: string
+            width: 
+              type: string
+      product: 
+        type: string
+      type: 
+        type: string
+      uri: 
+        type: string
+    example:
+      country: IT
+      display_name: Pier Bava
+      email: pibava3872@advew.com
+      explicit_content:
+        filter_enabled: false
+        filter_locked: false
+      external_urls:
+        spotify: 'https://open.spotify.com/user/0f0i7hiuth6l5szikpf52n0dm'
+      followers:
+        href: None
+        total: 0
+      href: 'https://api.spotify.com/v1/users/0f0i7hiuth6l5szikpf52n0dm'
+      id: 0f0i7hiuth6l5szikpf52n0dm
+      images: []
+      product: open
+      type: user
+      uri: 'spotify:user:0f0i7hiuth6l5szikpf52n0dm'
